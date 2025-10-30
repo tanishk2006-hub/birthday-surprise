@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday ❤️</title>
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #ffb6c1, #ff69b4);
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: #fff;
+    text-align: center;
+    overflow: hidden;
+  }
+  h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+  }
+  #countdown {
+    font-size: 2em;
+    margin-top: 10px;
+  }
+  #photo {
+    display: none;
+    margin-top: 30px;
+    width: 300px;
+    border-radius: 20px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 2s ease;
+  }
+  #message {
+    display: none;
+    font-size: 1.8em;
+    margin-top: 25px;
+    opacity: 0;
+    transition: opacity 2s ease;
+  }
+  canvas#confetti {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .heart {
+    position: fixed;
+    bottom: 0;
+    font-size: 24px;
+    animation: floatUp 6s linear infinite;
+    opacity: 0.8;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(0) scale(1); opacity: 0.8; }
+    100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+  <audio id="song" src="audio/song.mp3" preload="auto"></audio>
+  <h1>Countdown to My Baby's Birthday 🎂</h1>
+  <div id="countdown"></div>
+  <img id="photo" src="images/herphoto.jpg" alt="Happy Birthday!" />
+  <div id="message">You mean the world to me ❤️</div>
+  <canvas id="confetti"></canvas>
+
+  <script>
+    const birthday = new Date("2025-10-30T21:56:00").getTime();
+    const countdown = document.getElementById('countdown');
+    const photo = document.getElementById('photo');
+    const message = document.getElementById('message');
+    const song = document.getElementById('song');
+    const canvas = document.getElementById('confetti');
+    const ctx = canvas.getContext('2d');
+    let confettiPieces = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function createConfetti() {
+      for (let i = 0; i < 200; i++) {
+        confettiPieces.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          r: Math.random() * 6 + 2,
+          d: Math.random() * 2 + 1,
+          color: `hsl(${Math.random() * 360}, 100%, 70%)`,
+        });
+      }
+    }
+
+    function drawConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      confettiPieces.forEach((p) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2, false);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+      });
+      updateConfetti();
+    }
+
+    function updateConfetti() {
+      confettiPieces.forEach((p) => {
+        p.y += p.d;
+        if (p.y > canvas.height) {
+          p.y = -10;
+          p.x = Math.random() * canvas.width;
+        }
+      });
+    }
+
+    function startConfetti() {
+      createConfetti();
+      setInterval(drawConfetti, 20);
+    }
+
+    function createHeart() {
+      const heart = document.createElement('div');
+      heart.classList.add('heart');
+      heart.innerText = '❤️';
+      heart.style.left = Math.random() * 100 + 'vw';
+      heart.style.fontSize = Math.random() * 20 + 20 + 'px';
+      heart.style.animationDuration = Math.random() * 3 + 4 + 's';
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), 6000);
+    }
+
+    function startHearts() {
+      setInterval(createHeart, 400);
+    }
+
+    // Allow user interaction to unlock sound autoplay
+    document.body.addEventListener('click', () => {
+      song.load(); // preload only, don't play yet
+    });
+
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = birthday - now;
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      if (distance > 0) {
+        countdown.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+      } else {
+        clearInterval(timer);
+        countdown.innerHTML = "🎉 Happy Birthday, My Love! ❤️";
+        photo.style.display = "block";
+        setTimeout(() => photo.style.opacity = 1, 200);
+        setTimeout(() => {
+          message.style.display = "block";
+          message.style.opacity = 1;
+        }, 2500);
+        song.play().catch(() => {});
+        startConfetti();
+        startHearts();
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
